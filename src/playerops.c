@@ -1440,7 +1440,7 @@ void silentSwitchToPrev(AppState *state)
 void skipToPrevSong(AppState *state)
 {
         // Stop if there is no song or no previous song
-        if ((currentSong == NULL || currentSong->prev == NULL) && !isShuffleEnabled())
+        if (currentSong == NULL || currentSong->prev == NULL)
         {
                 if (!isStopped() && !isPaused())
                         stop();
