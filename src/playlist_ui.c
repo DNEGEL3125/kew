@@ -150,9 +150,9 @@ int displayPlaylist(PlayList *list, int maxListSize, int indent, int *chosenSong
                 startIter = *chosenSong;
         }
 
-        if (*chosenSong > startIter + maxListSize - round(maxListSize / 2))
+        if (*chosenSong > startIter + (maxListSize + 1) / 2)
         {
-                startIter = *chosenSong - maxListSize + round(maxListSize / 2);
+                startIter = *chosenSong - maxListSize + maxListSize / 2;
         }
 
         if (reset && !audioData.endOfListReached)
