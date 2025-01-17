@@ -1062,8 +1062,8 @@ void cleanupOnExit()
 #ifdef USE_DBUS
         cleanupDbusConnection();
 #endif
-        resetConsole();
         showCursor();
+        exitAlternateScreenBuffer();
         fflush(stdout);
 
         if (noMusicFound)
@@ -1505,6 +1505,7 @@ int main(int argc, char *argv[])
                 exit(0);
         }
 
+        enterAlternateScreenBuffer();
         initState(&appState);
         getConfig(&settings, ui);
         mapSettingsToKeys(&settings, keyMappings);
