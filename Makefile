@@ -128,6 +128,14 @@ $(WRAPPER_OBJ): $(WRAPPER_SRC) Makefile | $(OBJDIR)
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
+# Add debug flags
+DEBUG_CFLAGS := -g -O0 -Wall -Wextra -DDEBUG
+
+.PHONY: debug
+debug: CFLAGS += $(DEBUG_CFLAGS)
+debug: LDFLAGS += $(DEBUG_CFLAGS)
+debug: kew
+
 # Link all objects together
 kew: $(OBJS) $(WRAPPER_OBJ) Makefile
 	$(CC) -o kew $(OBJS) $(WRAPPER_OBJ) $(LIBS) $(LDFLAGS)
