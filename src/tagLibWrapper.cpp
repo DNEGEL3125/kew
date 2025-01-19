@@ -708,8 +708,8 @@ extern "C"
                 }
 
                 // Cover art extraction using format-specific classes if necessary.
-                std::string filename(input_file);
-                std::string extension = filename.substr(filename.find_last_of('.') + 1);
+                std::string_view filename(input_file);
+                std::string_view extension = filename.substr(filename.find_last_of('.') + 1);
                 bool coverArtExtracted = false;
 
                 if (extension == "mp3")
