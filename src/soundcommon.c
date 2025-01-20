@@ -14,6 +14,9 @@ soundcommon.c
 #define PATH_MAX 4096
 #endif
 
+const int MAX_VOLUME = 100;
+const int MIN_VOLUME = 0;
+
 bool repeatEnabled = false;
 bool shuffleEnabled = false;
 bool skipToNext = false;
@@ -44,7 +47,7 @@ double duration;
 
 double elapsedSeconds = 0.0;
 
-int soundVolume = 100;
+int soundVolume = MAX_VOLUME;
 
 ma_decoder *firstDecoder;
 ma_decoder *currentDecoder;
@@ -1304,18 +1307,18 @@ int getSystemVolume(void)
 
 void setVolume(int volume)
 {
-        if (volume > 100)
+        if (volume > MAX_VOLUME)
         {
-                volume = 100;
+                volume = MAX_VOLUME;
         }
-        else if (volume < 0)
+        else if (volume < MIN_VOLUME)
         {
-                volume = 0;
+                volume = MIN_VOLUME;
         }
 
         soundVolume = volume;
 
-        ma_device_set_master_volume(getDevice(), (float)volume / 100);
+        ma_device_set_master_volume(getDevice(), (float)volume / MAX_VOLUME);
 }
 
 int adjustVolumePercent(int volumeChange)
@@ -1325,7 +1328,7 @@ int adjustVolumePercent(int volumeChange)
         if (sysVol == 0)
                 return 0;
 
-        int step = 100 / sysVol * 5;
+        int step = MAX_VOLUME / sysVol * 5;
 
         int relativeVolChange = volumeChange / 5 * step;
 
