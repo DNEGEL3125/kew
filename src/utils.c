@@ -288,6 +288,7 @@ char *getConfigPath(void)
 
 void removeUnneededChars(char *str, int length)
 {
+        return;
         if (length < 6)
         {
                 return;

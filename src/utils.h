@@ -56,8 +56,6 @@ const char *getHomePath(void);
 
 char *getConfigPath(void);
 
-void removeUnneededChars(char *str, int length);
-
 void shortenString(char *str, size_t maxLength);
 
 void printBlankSpaces(int numSpaces);
