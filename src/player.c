@@ -77,7 +77,7 @@ int calcIdealImgSize(int *width, int *height, const int visualizerHeight, const 
 
         const int timeDisplayHeight = 1;
         const int heightMargin = 4;
-        const int minHeight = visualizerHeight + metatagHeight + timeDisplayHeight + heightMargin;
+        const int minHeight = visualizerHeight + metatagHeight + timeDisplayHeight + heightMargin + 1;
         const int minBorderWidth = 0;
 
         *height = term_h - minHeight;
@@ -93,6 +93,9 @@ int calcIdealImgSize(int *width, int *height, const int visualizerHeight, const 
                 *width = INT_MAX;
         if (*height > INT_MAX)
                 *height = INT_MAX;
+
+
+        *height -= 1;
 
         return 0;
 }
@@ -226,12 +229,11 @@ int displayCover(unsigned char *cover, int coverWidth, int coverHeight, const ch
 {
         if (!ascii)
         {
-                printSquareBitmapCentered(cover, coverWidth, coverHeight, height - 1);
+                printSquareBitmapCentered(cover, coverWidth, coverHeight, height);
         }
         else
         {
-                int width = height * 2;
-                printInAscii(coverArtPath, height - 1, width);
+                printInAscii(coverArtPath, height);
         }
         printf("\n\n");
 
@@ -516,8 +518,10 @@ void printLastRow(void)
         if (term_w < minWidth)
                 return;
 
+#ifndef __APPLE__
         // Move to lastRow
         printf("\033[%d;1H", term_h);
+#endif
 
         setTextColorRGB(lastRowColor.r, lastRowColor.g, lastRowColor.b);
 
@@ -539,14 +543,26 @@ void printLastRow(void)
 
                 if (isPaused())
                 {
-                        char pauseText[] = " \uf04c";
+                        char pauseText[] = " \u23f8";
+                        snprintf(nerdFontText + currentLength, maxLength - currentLength, "%s", pauseText);
+                        currentLength += strnlen(pauseText, maxLength - currentLength);
+                }
+                else if (isStopped())
+                {
+                        char pauseText[] = " \u23f9";
+                        snprintf(nerdFontText + currentLength, maxLength - currentLength, "%s", pauseText);
+                        currentLength += strnlen(pauseText, maxLength - currentLength);
+                }
+                else
+                {
+                        char pauseText[] = " \u25b6";
                         snprintf(nerdFontText + currentLength, maxLength - currentLength, "%s", pauseText);
                         currentLength += strnlen(pauseText, maxLength - currentLength);
                 }
 
                 if (isRepeatEnabled())
                 {
-                        char repeatText[] = " \uf01e";
+                        char repeatText[] = " \u27f3";
                         snprintf(nerdFontText + currentLength, maxLength - currentLength, "%s", repeatText);
                         currentLength += strnlen(repeatText, maxLength - currentLength);
                 }
@@ -981,21 +997,30 @@ void printVisualizer(double elapsedSeconds, AppState *state)
                 visualizerWidth -= 1;
                 uis->numProgressBars = (int)visualizerWidth / 2;
 
+#ifndef __APPLE__
                 saveCursorPosition();
+#endif
                 drawSpectrumVisualizer(ui->visualizerHeight, visualizerWidth, ui->color, indent, ui->useConfigColors);
                 printElapsedBars(calcElapsedBars(elapsedSeconds, duration, uis->numProgressBars), uis->numProgressBars);
                 printLastRow();
+#ifndef __APPLE__
                 restoreCursorPosition();
                 cursorJump(1);
+#else
+                int jumpAmount = ui->visualizerHeight + 2;
+                cursorJump(jumpAmount);
+#endif
         }
         else if (!ui->visualizerEnabled)
         {
                 if (term_w >= minWidth)
                 {
-                        printf("\n\n");
+                        printf("\n");
+
                         saveCursorPosition();
                         printLastRow();
                         restoreCursorPosition();
+                        cursorJump(1);
                 }
         }
 }
@@ -1314,6 +1339,7 @@ void showLibrary(SongData *songData, AppState *state)
                         {
                                 chosenLibRow -= state->uiState.numSongsAboveSubDir;
                         }
+                        libCurrentDirSongCount = 0;
                         state->uiState.openedSubDir = false;
                         state->uiState.numSongsAboveSubDir = 0;
                 }
