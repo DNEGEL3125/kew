@@ -35,3 +35,4 @@ kew
 .vscode/
 error.log
 valgrind-out.txt
+compile_commands.json
