@@ -36,3 +36,4 @@ kew
 error.log
 valgrind-out.txt
 compile_commands.json
+.cache/
