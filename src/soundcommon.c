@@ -1321,22 +1321,8 @@ void setVolume(int volume)
         ma_device_set_master_volume(getDevice(), (float)volume / MAX_VOLUME);
 }
 
-int adjustVolumePercent(int volumeChange)
-{
-        int sysVol = getSystemVolume();
-
-        if (sysVol == 0)
-                return 0;
-
-        int step = MAX_VOLUME / sysVol * 5;
-
-        int relativeVolChange = volumeChange / 5 * step;
-
-        soundVolume += relativeVolChange;
-
-        setVolume(soundVolume);
-
-        return 0;
+void adjustVolume(int volumeChange) {
+        setVolume(soundVolume + volumeChange);
 }
 
 ma_uint64 lastCursor = 0;

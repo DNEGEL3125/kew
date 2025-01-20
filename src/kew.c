@@ -638,11 +638,11 @@ void handleInput(AppState *state)
                 scrollPrev();
                 break;
         case EVENT_VOLUME_UP:
-                adjustVolumePercent(5);
+                adjustVolume(5);
                 emitVolumeChanged();
                 break;
         case EVENT_VOLUME_DOWN:
-                adjustVolumePercent(-5);
+                adjustVolume(-5);
                 emitVolumeChanged();
                 break;
         case EVENT_NEXT:

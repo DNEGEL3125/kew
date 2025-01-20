@@ -268,7 +268,7 @@ int getCurrentVolume(void);
 
 void setVolume(int volume);
 
-int adjustVolumePercent(int volumeChange);
+void adjustVolume(int volumeChange);
 
 void m4a_on_audio_frames(ma_device *pDevice, void *pFramesOut, const void *pFramesIn, ma_uint32 frameCount);
 
