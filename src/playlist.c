@@ -790,7 +790,7 @@ void addSongToPlayList(PlayList *list, const char *filePath, int playlistMax)
         addToList(list, newNode);
 }
 
-void traverseFileSystemEntry(FileSystemEntry *entry, PlayList *list, int playlistMax)
+void traverseFileSystemEntry(const FileSystemEntry *entry, PlayList *list, const int playlistMax)
 {
         if (entry == NULL || list->count >= playlistMax)
                 return;
