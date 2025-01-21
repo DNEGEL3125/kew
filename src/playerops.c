@@ -594,7 +594,7 @@ void seekBack(UIState *uis)
 
         if (duration != 0.0)
         {
-                float step = 100 / uis->numProgressBars;
+                float step = 100.0f / uis->numProgressBars;
                 seekAccumulatedSeconds -= step * duration / 100.0;
         }
         rewinding = true;
