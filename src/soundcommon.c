@@ -1,4 +1,5 @@
 #include "soundcommon.h"
+#include "playerops.h"
 
 /*
 
@@ -43,7 +44,6 @@ enum AudioImplementation currentImplementation = NONE;
 
 AppState appState;
 volatile bool refresh = true; // Should the whole view be refreshed next time it redraws
-double duration;
 
 double elapsedSeconds = 0.0;
 
@@ -936,6 +936,12 @@ double getSeekElapsed(void)
 
 double getPercentageElapsed(void)
 {
+        SongData *currentSongData = getCurrentSongData();
+        if (currentSongData == NULL) {
+                perror("Trying to get music duration, but no music is playing.");
+                exit(EXIT_FAILURE);
+        }
+        double duration = currentSongData->duration;
         return elapsedSeconds / duration;
 }
 
