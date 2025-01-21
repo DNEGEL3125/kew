@@ -37,7 +37,6 @@ int preferredHeight = 0;
 int textWidth = 0;
 int indent = 0;
 char *tagsPath;
-double totalDurationSeconds = 0.0;
 
 PixelData lastRowColor = {120, 120, 120};
 TagSettings metadata = {};
