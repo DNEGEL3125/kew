@@ -33,7 +33,7 @@ Node *determineStartNode(Node *head, int *foundAt, bool *startFromCurrent, int l
         return foundNode ? foundNode : head;
 }
 
-void preparePlaylistString(Node *node, char *buffer, int bufferSize, int shortenAmount)
+void preparePlaylistString(const Node *node, char *buffer, const int bufferSize, const int shortenAmount)
 {
         if (node == NULL || buffer == NULL)
         {
