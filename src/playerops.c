@@ -464,6 +464,7 @@ void calcElapsedTime(void)
                                  (double)(current_time.tv_nsec - start_time.tv_nsec) / 1e9;
                 double seekElapsed = getSeekElapsed();
                 double diff = elapsedSeconds + (seekElapsed + seekAccumulatedSeconds - totalPauseSeconds);
+                double duration = getCurrentSongData()->duration;
 
                 if (diff < 0)
                         seekElapsed -= diff;
@@ -506,7 +507,8 @@ void flushSeek(void)
                 setSeekElapsed(getSeekElapsed() + seekAccumulatedSeconds);
                 seekAccumulatedSeconds = 0.0;
                 calcElapsedTime();
-                float percentage = elapsedSeconds / (float)duration * 100.0;
+                double duration = getCurrentSongData()->duration;
+                float percentage = elapsedSeconds / duration * 100.0;
 
                 if (percentage < 0.0)
                 {
@@ -526,6 +528,7 @@ bool setPosition(gint64 newPosition)
                 return false;
 
         gint64 currentPositionMicroseconds = llround(elapsedSeconds * G_USEC_PER_SEC);
+        double duration = getCurrentSongData()->duration;
 
         if (duration != 0.0)
         {
@@ -545,6 +548,7 @@ bool seekPosition(gint64 offset)
         if (isPaused())
                 return false;
 
+        double duration = getCurrentSongData()->duration;
         if (duration != 0.0)
         {
                 gint64 step = offset;
@@ -560,6 +564,7 @@ bool seekPosition(gint64 offset)
 
 void seekForward(UIState *uis)
 {
+        double duration = getCurrentSongData()->duration;
         if (currentSong != NULL)
         {
                 if (pathEndsWith(currentSong->song.filePath, "ogg"))
@@ -581,6 +586,7 @@ void seekForward(UIState *uis)
 
 void seekBack(UIState *uis)
 {
+        double duration = getCurrentSongData()->duration;
         if (currentSong != NULL)
         {
                 if (pathEndsWith(currentSong->song.filePath, "ogg"))

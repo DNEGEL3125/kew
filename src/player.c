@@ -1,4 +1,5 @@
 #include "player.h"
+#include "playerops.h"
 /*
 
 player.c
@@ -411,7 +412,7 @@ void printMetadata(TagSettings const *metadata, UISettings *ui)
         printBasicMetadata(metadata, ui);
 }
 
-void printTime(double elapsedSeconds, AppState *state)
+void printTime(double elapsedSeconds, double duration, AppState *state)
 {
         if (!timeEnabled || appState.currentView == LIBRARY_VIEW || appState.currentView == PLAYLIST_VIEW || appState.currentView == SEARCH_VIEW)
                 return;
@@ -980,7 +981,7 @@ void printElapsedBars(int elapsedBars, int numProgressBars)
         printf("\n");
 }
 
-void printVisualizer(double elapsedSeconds, AppState *state)
+void printVisualizer(double elapsedSeconds, double duration, AppState *state)
 {
         UISettings *ui = &(state->uiSettings);
         UIState *uis = &(state->uiState);
@@ -1428,7 +1429,6 @@ int printPlayer(SongData *songdata, double elapsedSeconds, AppSettings *settings
         if (songdata != NULL && songdata->metadata != NULL && !songdata->hasErrors && (songdata->hasErrors < 1))
         {
                 metadata = *songdata->metadata;
-                duration = songdata->duration;
 
                 ui->color.r = songdata->red;
                 ui->color.g = songdata->green;
@@ -1491,8 +1491,9 @@ int printPlayer(SongData *songdata, double elapsedSeconds, AppSettings *settings
                         printMetadata(songdata->metadata, ui);
                         refresh = false;
                 }
-                printTime(elapsedSeconds, state);
-                printVisualizer(elapsedSeconds, state);
+                double duration = songdata->duration;
+                printTime(elapsedSeconds, duration, state);
+                printVisualizer(elapsedSeconds, duration, state);
         }
 
         fflush(stdout);
