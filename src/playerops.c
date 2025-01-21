@@ -464,14 +464,18 @@ void calcElapsedTime(void)
                                  (double)(current_time.tv_nsec - start_time.tv_nsec) / 1e9;
                 double seekElapsed = getSeekElapsed();
                 double diff = elapsedSeconds + (seekElapsed + seekAccumulatedSeconds - totalPauseSeconds);
-                double duration = getCurrentSongData()->duration;
+                SongData *currentSongData = getCurrentSongData();
 
                 if (diff < 0)
                         seekElapsed -= diff;
 
                 elapsedSeconds += seekElapsed + seekAccumulatedSeconds - totalPauseSeconds;
-                if (elapsedSeconds > duration)
-                        elapsedSeconds = duration;
+                if (currentSongData != NULL) {
+                        double duration = currentSongData->duration;
+                        if (elapsedSeconds > duration) {
+                                elapsedSeconds = duration;
+                        }
+                }
 
                 setSeekElapsed(seekElapsed);
 
@@ -564,7 +568,6 @@ bool seekPosition(gint64 offset)
 
 void seekForward(UIState *uis)
 {
-        double duration = getCurrentSongData()->duration;
         if (currentSong != NULL)
         {
                 if (pathEndsWith(currentSong->song.filePath, "ogg"))
@@ -576,6 +579,7 @@ void seekForward(UIState *uis)
         if (isPaused())
                 return;
 
+        double duration = getCurrentSongData()->duration;
         if (duration != 0.0)
         {
                 float step = 100 / uis->numProgressBars;
@@ -586,7 +590,6 @@ void seekForward(UIState *uis)
 
 void seekBack(UIState *uis)
 {
-        double duration = getCurrentSongData()->duration;
         if (currentSong != NULL)
         {
                 if (pathEndsWith(currentSong->song.filePath, "ogg"))
@@ -598,6 +601,7 @@ void seekBack(UIState *uis)
         if (isPaused())
                 return;
 
+        double duration = getCurrentSongData()->duration;
         if (duration != 0.0)
         {
                 float step = 100.0f / uis->numProgressBars;
