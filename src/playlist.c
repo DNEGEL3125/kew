@@ -1,3 +1,4 @@
+#include <libgen.h>
 #define _XOPEN_SOURCE 700
 #define __USE_XOPEN_EXTENDED 1
 
@@ -533,19 +534,8 @@ int makePlaylist(int argc, char *argv[], bool exactSearch, const char *path)
         return 0;
 }
 
-void generateM3UFilename(const char *basePath, const char *filePath, char *m3uFilename, size_t size)
+void generateM3UFilename(const char *basePath, const char *baseName, char *m3uFilename, size_t size)
 {
-
-        const char *baseName = strrchr(filePath, '/');
-        if (baseName == NULL)
-        {
-                baseName = filePath; // No '/' found, use the entire filename
-        }
-        else
-        {
-                baseName++; // Skip the '/' character
-        }
-
         const char *dot = strrchr(baseName, '.');
         if (dot == NULL)
         {
@@ -659,7 +649,10 @@ void savePlaylist(const char *path)
 
         char m3uFilename[MAXPATHLEN];
 
-        generateM3UFilename(path, playlist.head->song.filePath, m3uFilename, sizeof(m3uFilename));
+        char baseName[MAXPATHLEN];
+        // Get baseName from filePath
+        basename_r(playlist.head->song.filePath, baseName);
+        generateM3UFilename(path, baseName, m3uFilename, sizeof(m3uFilename));
 
         writeM3UFile(m3uFilename, &playlist);
 }
