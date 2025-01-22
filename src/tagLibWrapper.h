@@ -23,6 +23,10 @@ extern "C"
 #endif
         int extractTags(const char *input_file, TagSettings *tag_settings, double *duration, const char *coverFilePath);
 
+        char *getTagTitleByFilePath(const char *inputFile);
+
+        char *getTagArtistByFilePath(const char *inputFile);
+
 #ifdef __cplusplus
 }
 #endif

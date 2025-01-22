@@ -706,6 +706,61 @@ extern "C"
                 }
         }
 
+
+        char *getTagTitleByFilePath(const char *inputFile)
+        {
+                TagLib::FileRef f(inputFile);
+                if (f.isNull() || !f.file())
+                {
+                        fprintf(stderr, "FileRef is null or file could not be opened: '%s'\n", inputFile);
+                        return NULL;
+                }
+
+                const TagLib::Tag *tag = f.tag();
+                if (!tag)
+                {
+                        fprintf(stderr, "Tag is null for file '%s'\n", inputFile);
+                        return NULL;
+                }
+
+                const size_t tagTitleLength = tag->title().size();
+                const size_t tagTitleSize = sizeof(char) * (tagTitleLength + 1);
+                const char *tagTitle = tag->title().toCString(true);
+                // Copy the title
+                char *tagTitleClone = (char *)malloc(tagTitleSize);
+                c_strcpy(tagTitleClone, tagTitle, sizeof(tagTitleSize));
+                tagTitleClone[tagTitleLength] = '\0';
+
+                return tagTitleClone;
+        }
+
+        char *getTagArtistByFilePath(const char *inputFile)
+        {
+                TagLib::FileRef f(inputFile);
+                if (f.isNull() || !f.file())
+                {
+                        fprintf(stderr, "FileRef is null or file could not be opened: '%s'\n", inputFile);
+                        return NULL;
+                }
+
+                const TagLib::Tag *tag = f.tag();
+                if (!tag)
+                {
+                        fprintf(stderr, "Tag is null for file '%s'\n", inputFile);
+                        return NULL;
+                }
+
+                const size_t tagArtistLength = tag->artist().size();
+                const size_t tagArtistSize = sizeof(char) * (tagArtistLength + 1);
+                const char *tagArtist = tag->title().toCString(true);
+                // Copy the title
+                char *tagArtistClone = (char *)malloc(tagArtistSize);
+                c_strcpy(tagArtistClone, tagArtist, sizeof(tagArtistSize));
+                tagArtistClone[tagArtistLength] = '\0';
+
+                return tagArtistClone;
+        }
+
         int extractTags(const char *input_file, TagSettings *tag_settings, double *duration, const char *coverFilePath)
         {
                 memset(tag_settings, 0, sizeof(TagSettings)); // Initialize tag settings
