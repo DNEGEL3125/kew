@@ -213,18 +213,17 @@ void shufflePlaylistStartingFromSong(PlayList *playlist, Node *song)
 
 void createNode(Node **node, const char *directoryPath, int id)
 {
-        SongInfo song;
-        song.filePath = strdup(directoryPath);
-        song.duration = 0.0;
-
         *node = (Node *)malloc(sizeof(Node));
         if (*node == NULL)
         {
                 printf("Failed to allocate memory.");
-                free(song.filePath);
                 exit(0);
                 return;
         }
+
+        SongInfo song;
+        song.filePath = strdup(directoryPath);
+        song.duration = 0.0;
 
         (*node)->song = song;
         (*node)->next = NULL;
