@@ -118,7 +118,7 @@ int createDevice(UserData *userData, ma_device *device, ma_context *context, ma_
 
         result = ma_device_start(device);
         if (result != MA_SUCCESS)
-                return -1;        
+                return -1;
 
         appState.uiState.doNotifyMPRISPlaying = true;
 
@@ -164,7 +164,7 @@ int vorbis_createAudioDevice(UserData *userData, ma_device *device, ma_context *
                 printf("\n\nFailed to start miniaudio device.\n");
                 return -1;
         }
-        
+
         appState.uiState.doNotifyMPRISPlaying = true;
 
         return 0;
@@ -206,7 +206,7 @@ int m4a_createAudioDevice(UserData *userData, ma_device *device, ma_context *con
                 printf("\n\nFailed to start miniaudio device.\n");
                 return -1;
         }
-       
+
         appState.uiState.doNotifyMPRISPlaying = true;
 
         return 0;
@@ -248,7 +248,7 @@ int opus_createAudioDevice(UserData *userData, ma_device *device, ma_context *co
                 printf("\n\nFailed to start miniaudio device.\n");
                 return -1;
         }
-        
+
         appState.uiState.doNotifyMPRISPlaying = true;
 
         return 0;
@@ -263,6 +263,113 @@ bool validFilePath(char *filePath)
                 return false;
 
         return true;
+}
+
+int setAudioImplementaionToOpus(const char *filePath)
+{
+        enum AudioImplementation currentImplementation = getCurrentImplementationType();
+        ma_uint32 sampleRate;
+        ma_uint32 channels;
+        ma_format format;
+        ma_channel channelMap[MA_MAX_CHANNELS];
+
+        ma_uint32 nSampleRate;
+        ma_uint32 nChannels;
+        ma_format nFormat;
+        ma_channel nChannelMap[MA_MAX_CHANNELS];
+        ma_libopus *decoder = getCurrentOpusDecoder();
+
+        getOpusFileInfo(filePath, &format, &channels, &sampleRate, channelMap);
+
+        if (decoder != NULL)
+                ma_libopus_ds_get_data_format(decoder, &nFormat, &nChannels, &nSampleRate, nChannelMap, MA_MAX_CHANNELS);
+
+        bool sameFormat = (decoder != NULL && (format == decoder->format &&
+                                               channels == nChannels &&
+                                               sampleRate == nSampleRate));
+
+        if (isRepeatEnabled() || !(sameFormat && currentImplementation == OPUS))
+        {
+                setImplSwitchReached();
+
+                pthread_mutex_lock(&dataSourceMutex);
+
+                setCurrentImplementationType(OPUS);
+
+                cleanupPlaybackDevice();
+
+                resetDecoders();
+                resetVorbisDecoders();
+#ifdef U
+                resetM4aDecoders();
+#endif
+                resetOpusDecoders();
+                resetAudioBuffer();
+
+                int result = opus_createAudioDevice(&userData, getDevice(), &context);
+                pthread_mutex_unlock(&dataSourceMutex);
+
+                setImplSwitchNotReached();
+
+                if (result < 0)
+                {
+                        return result;
+                }
+
+        }
+        return 0;
+}
+
+int setAudioImplementationToOgg(const char *filePath)
+{
+        enum AudioImplementation currentImplementation = getCurrentImplementationType();
+        ma_uint32 sampleRate;
+        ma_uint32 channels;
+        ma_format format;
+        ma_channel channelMap[MA_MAX_CHANNELS];
+
+        ma_uint32 nSampleRate;
+        ma_uint32 nChannels;
+        ma_format nFormat;
+        ma_channel nChannelMap[MA_MAX_CHANNELS];
+        ma_libvorbis *decoder = getCurrentVorbisDecoder();
+
+        getVorbisFileInfo(filePath, &format, &channels, &sampleRate, channelMap);
+
+        if (decoder != NULL)
+                ma_libvorbis_ds_get_data_format(decoder, &nFormat, &nChannels, &nSampleRate, nChannelMap, MA_MAX_CHANNELS);
+
+        bool sameFormat = (decoder != NULL && (format == decoder->format &&
+                                               channels == nChannels &&
+                                               sampleRate == nSampleRate));
+
+        if (isRepeatEnabled() || !(sameFormat && currentImplementation == VORBIS))
+        {
+                setImplSwitchReached();
+
+                pthread_mutex_lock(&dataSourceMutex);
+
+                setCurrentImplementationType(VORBIS);
+
+                cleanupPlaybackDevice();
+
+                resetDecoders();
+                resetVorbisDecoders();
+#ifdef U
+                resetM4aDecoders();
+#endif
+                resetOpusDecoders();
+                resetAudioBuffer();
+
+                int result = vorbis_createAudioDevice(&userData, getDevice(), &context);
+                pthread_mutex_unlock(&dataSourceMutex);
+
+                setImplSwitchNotReached();
+
+                return result;
+
+        }
+        return 0;
 }
 
 bool tryAgain = false;
@@ -336,9 +443,9 @@ int switchAudioImplementation(void)
 
                         resetDecoders();
                         resetVorbisDecoders();
-#ifdef USE_FAAD                        
+#ifdef USE_FAAD
                         resetM4aDecoders();
-#endif                        
+#endif
                         resetOpusDecoders();
                         resetAudioBuffer();
 
@@ -361,116 +468,24 @@ int switchAudioImplementation(void)
         }
         else if (pathEndsWith(filePath, "opus"))
         {
-                ma_uint32 sampleRate;
-                ma_uint32 channels;
-                ma_format format;
-                ma_channel channelMap[MA_MAX_CHANNELS];
-
-                ma_uint32 nSampleRate;
-                ma_uint32 nChannels;
-                ma_format nFormat;
-                ma_channel nChannelMap[MA_MAX_CHANNELS];
-                ma_libopus *decoder = getCurrentOpusDecoder();
-
-                getOpusFileInfo(filePath, &format, &channels, &sampleRate, channelMap);
-
-                if (decoder != NULL)
-                        ma_libopus_ds_get_data_format(decoder, &nFormat, &nChannels, &nSampleRate, nChannelMap, MA_MAX_CHANNELS);
-
-                bool sameFormat = (decoder != NULL && (format == decoder->format &&
-                                                       channels == nChannels &&
-                                                       sampleRate == nSampleRate));
-
-                if (isRepeatEnabled() || !(sameFormat && currentImplementation == OPUS))
+                int result = setAudioImplementaionToOpus(filePath);
+                if (result < 0)
                 {
-                        setImplSwitchReached();
-
-                        pthread_mutex_lock(&dataSourceMutex);
-
-                        setCurrentImplementationType(OPUS);
-
-                        cleanupPlaybackDevice();
-
-                        resetDecoders();
-                        resetVorbisDecoders();
-#ifdef USE_FAAD                        
-                        resetM4aDecoders();
-#endif                        
-                        resetOpusDecoders();
-                        resetAudioBuffer();
-
-                        int result = opus_createAudioDevice(&userData, getDevice(), &context);
-
-                        if (result < 0)
-                        {
-                                setCurrentImplementationType(NONE);
-                                setImplSwitchNotReached();
-                                setEOFReached();
-                                free(filePath);
-                                pthread_mutex_unlock(&dataSourceMutex);
-                                return -1;
-                        }
-
-                        pthread_mutex_unlock(&dataSourceMutex);
-
-                        setImplSwitchNotReached();
+                        setCurrentImplementationType(NONE);
+                        setEOFReached();
+                        free(filePath);
+                        return -1;
                 }
         }
         else if (pathEndsWith(filePath, "ogg"))
         {
-                ma_uint32 sampleRate;
-                ma_uint32 channels;
-                ma_format format;
-                ma_channel channelMap[MA_MAX_CHANNELS];
-
-                ma_uint32 nSampleRate;
-                ma_uint32 nChannels;
-                ma_format nFormat;
-                ma_channel nChannelMap[MA_MAX_CHANNELS];
-                ma_libvorbis *decoder = getCurrentVorbisDecoder();
-
-                getVorbisFileInfo(filePath, &format, &channels, &sampleRate, channelMap);
-
-                if (decoder != NULL)
-                        ma_libvorbis_ds_get_data_format(decoder, &nFormat, &nChannels, &nSampleRate, nChannelMap, MA_MAX_CHANNELS);
-
-                bool sameFormat = (decoder != NULL && (format == decoder->format &&
-                                                       channels == nChannels &&
-                                                       sampleRate == nSampleRate));
-
-                if (isRepeatEnabled() || !(sameFormat && currentImplementation == VORBIS))
+                int result = setAudioImplementationToOgg(filePath);
+                if (result < 0)
                 {
-                        setImplSwitchReached();
-
-                        pthread_mutex_lock(&dataSourceMutex);
-
-                        setCurrentImplementationType(VORBIS);
-
-                        cleanupPlaybackDevice();
-
-                        resetDecoders();
-                        resetVorbisDecoders();
-#ifdef USE_FAD                        
-                        resetM4aDecoders();
-#endif                        
-                        resetOpusDecoders();
-                        resetAudioBuffer();
-
-                        int result = vorbis_createAudioDevice(&userData, getDevice(), &context);
-
-                        if (result < 0)
-                        {
-                                setCurrentImplementationType(NONE);
-                                setImplSwitchNotReached();
-                                setEOFReached();
-                                free(filePath);
-                                pthread_mutex_unlock(&dataSourceMutex);
-                                return -1;
-                        }
-
-                        pthread_mutex_unlock(&dataSourceMutex);
-
-                        setImplSwitchNotReached();
+                        setCurrentImplementationType(NONE);
+                        setEOFReached();
+                        free(filePath);
+                        return -1;
                 }
         }
         else if (pathEndsWith(filePath, "m4a") || pathEndsWith(filePath, "aac"))
